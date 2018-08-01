@@ -23,6 +23,13 @@ public class NumGrid
         Arrays.fill(potential, true);
     }
     
+    public void setGrid(int[][] numGrid)
+    {
+        for(int i = 0; i<9; i++)
+            for(int j = 0; j<9; j++)
+                potential[i][j] = (numGrid[i][j] < 1);
+    }
+    
     
     public void updateCell(int x, int y)
     {

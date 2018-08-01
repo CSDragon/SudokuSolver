@@ -57,13 +57,17 @@ public class SuGrid
     
     public void setGrid(int[][] nums)
     {
+        
+        //Invert the input because I"M AN IDIOT
+        //nums is in [row][col] format where we want [col][row]
+        
         for(int i = 0; i<9; i++)
             for(int j=0; j<9; j++)
             {
-                if(nums[i][j] != -1)
-                    cells[i][j].set(nums[i][j]);
+                if(nums[i][j] > 0 && nums[i][j] < 10)
+                    cells[j][i].set(nums[i][j]);
                 else
-                    cells[i][j].reset();
+                    cells[j][i].reset();
             }
     }
     
@@ -74,17 +78,27 @@ public class SuGrid
         {
             for(int i = 0; i<8; i++)
             {
-                if(cells[i][j].getNumber()>0)
+                if(cells[i][j].getConfirmed())
                     System.out.print(cells[i][j].getNumber() + ", ");
                 else
                     System.out.print(" , ");
             }
             
-            if(cells[8][j].getNumber()>0)
+            if(cells[8][j].getConfirmed())
                     System.out.println(cells[8][j].getNumber());
                 else
                     System.out.println(" ");
             
+        }
+    }
+    
+    public void initialize()
+    {
+        for(int i = 0; i<9; i++)
+        {
+            rows[i].initialize();
+            cols[i].initialize();
+            squares[i].initialize();
         }
     }
     
@@ -103,6 +117,16 @@ public class SuGrid
     public SuGroup getSquare(int squareNum)
     {
         return squares[squareNum];
+    }
+    
+    public SuCell getCell(int x, int y)
+    {
+        return cells[x][y];
+    }
+    
+    public SuCell[][] getCells()
+    {
+        return cells;
     }
     
     

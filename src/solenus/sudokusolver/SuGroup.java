@@ -42,6 +42,43 @@ public class SuGroup
         }
     }
     
+    /**
+     * Takes the initial grid state and figures out the group's initial conditions, as well as the cells inside of it.
+     */
+    public void initialize()
+    {
+        //set parenthood
+        for(int i = 0; i<9; i++)
+        {
+            switch (groupType)
+            {
+                case ROW:
+                    cells[i].setParentRow(this);
+                    break;
+                case COL:
+                    cells[i].setParentCol(this);
+                    break;
+                case BOX:
+                    cells[i].setParentSquare(this);
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+        //find the ones we've already confirmed
+        for(int i = 0; i<9; i++)
+            if(cells[i].getConfirmed())
+                confirmed[cells[i].getNumber()-1] = true;
+      
+        //now that we have a list of all confirmed numbers in this group, make sure each cell knows it can't be that.
+        for(int i = 0; i<9; i++)
+            if(!cells[i].getConfirmed())
+                for(int j = 0; j<9; j++)
+                    if(confirmed[j])
+                        cells[i].getPotentials()[j] = false;
+    }
+    
     
     public void printGroup()
     {
@@ -51,13 +88,13 @@ public class SuGroup
             case COL:
                 for(int i = 0; i < 8; i++)
                 {
-                    if(cells[i].getNumber()>0)
+                    if(cells[i].getConfirmed())
                         System.out.print(cells[i].getNumber() + ", ");
                     else
                         System.out.print(" , ");
                 }   
                 
-                if(cells[8].getNumber()>0)
+                if(cells[8].getConfirmed())
                     System.out.println(cells[8].getNumber());
                 else
                     System.out.println(" ");
@@ -67,7 +104,7 @@ public class SuGroup
                 {
                     if(i%3 != 2)
                     {
-                        if(cells[i].getNumber()>0)
+                        if(cells[i].getConfirmed())
                             System.out.print(cells[i].getNumber() + ", ");
                         else
                             System.out.print(" , ");
@@ -75,7 +112,7 @@ public class SuGroup
 
                     else
                     {
-                        if(cells[i].getNumber()>0)
+                        if(cells[i].getConfirmed())
                             System.out.println(cells[i].getNumber());
                         else
                             System.out.println(" ");

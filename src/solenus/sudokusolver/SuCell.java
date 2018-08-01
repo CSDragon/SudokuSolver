@@ -5,7 +5,9 @@
  */
 package solenus.sudokusolver;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -13,12 +15,23 @@ import java.util.Arrays;
  */
 public class SuCell 
 {
+
+    /**
+     * @param parentSquare the parentSquare to set
+     */
+    public void setParentSquare(SuGroup parentSquare) {
+        this.parentSquare = parentSquare;
+    }
     private boolean confirmed;
     private int number;
     private boolean[] potentials;
     
     private int xPos;
     private int yPos;
+    
+    private SuGroup parentRow;
+    private SuGroup parentCol;
+    private SuGroup parentSquare;
     
     public SuCell(int x, int y)
     {
@@ -79,7 +92,13 @@ public class SuCell
         confirmed = true;
         number = num;
         Arrays.fill(potentials, false);
-        //potentials[number-1] = true;
+        
+        if(parentRow != null)
+            parentRow.eliminate(num);
+        if(parentCol != null)
+            parentCol.eliminate(num);
+        if(parentSquare != null)
+            parentSquare.eliminate(num);
     }
     
     public void reset()
@@ -90,11 +109,43 @@ public class SuCell
     }
     
     
+    /**
+     * Potentials to int list
+     * @return An arraylist of the potentials.
+     */
+    public ArrayList<Integer> listPotentials()
+    {
+        ArrayList<Integer> ret = new ArrayList<>();
+        
+        for(int i = 0; i<9; i++)
+        {
+            if(potentials[i])
+                ret.add(i+1);
+        }
+        return ret;
+    }
+    
+    public void printCell()
+    {
+        System.out.println("Cell (" + xPos + "," + yPos + ")");
+        System.out.println("Confirmed: "+ confirmed);
+        if(confirmed)
+            System.out.println(number);
+        else
+        {
+            for(int i = 0; i<9; i++)
+                if(potentials[i])
+                    System.out.print(i+1);
+            System.out.println();
+        }
+    }
+    
+    
     
     /**
      * @return the confirmed
      */
-    public boolean isConfirmed() 
+    public boolean getConfirmed() 
     {
         return confirmed;
     }
@@ -129,5 +180,45 @@ public class SuCell
     public int getyPos() 
     {
         return yPos;
+    }
+    
+    /**
+     * @return the parentRow
+     */
+    public SuGroup getParentRow() 
+    {
+        return parentRow;
+    }
+
+    /**
+     * @param parentRow the parentRow to set
+     */
+    public void setParentRow(SuGroup parentRow) 
+    {
+        this.parentRow = parentRow;
+    }
+
+    /**
+     * @return the parentCol
+     */
+    public SuGroup getParentCol() 
+    {
+        return parentCol;
+    }
+
+    /**
+     * @param parentCol the parentCol to set
+     */
+    public void setParentCol(SuGroup parentCol) 
+    {
+        this.parentCol = parentCol;
+    }
+
+    /**
+     * @return the parentSquare
+     */
+    public SuGroup getParentSquare() 
+    {
+        return parentSquare;
     }
 }
