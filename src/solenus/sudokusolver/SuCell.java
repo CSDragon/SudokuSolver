@@ -25,6 +25,7 @@ public class SuCell
     private boolean confirmed;
     private int number;
     private boolean[] potentials;
+    private ArrayList<Integer> listPotentials;
     
     private int xPos;
     private int yPos;
@@ -38,10 +39,13 @@ public class SuCell
         xPos = x;
         yPos = y;
         confirmed = false;
-        number = -1;
+        number = 0;
         
         potentials = new boolean[9];
         Arrays.fill(potentials, true);
+        listPotentials = new ArrayList<>();
+        for(int i = 1; i<10; i++)
+            listPotentials.add(i);
     }
     
     public SuCell()
@@ -52,36 +56,19 @@ public class SuCell
     /**
      * Eliminates a number (not index) from potentials
      * @param elim number to be eliminated.
+     * @return if a change was actually made.
      */
-    public void eliminate(int elim)
+    public boolean eliminate(int elim)
     {
-        potentials[elim-1] = false;
-    }
-    
-    
-    /**
-     * Checks if there's only one potential left.
-     * @return The number that was identified, (not an index).
-     */
-    public int potentailCheck()
-    {
-        int num = -1;
-        for(int i = 0; i<9; i++)
-        {
-            if(getPotentials()[i] && num == -1)
-                num = i+1;
-            else if(getPotentials()[i] && num != -1)
-                num = -2;
-        }
         
-        if(num < 0)
+        if(potentials[elim-1])
         {
-            confirmed = true;
-            number = num;
+            listPotentials.remove(listPotentials.indexOf(elim));
+            potentials[elim-1] = false;
+            return true;
         }
-        return getNumber();
+        return false;
     }
-    
     
     /**
      * Confirms a square as a number;
@@ -92,6 +79,7 @@ public class SuCell
         confirmed = true;
         number = num;
         Arrays.fill(potentials, false);
+        listPotentials.clear();
         
         if(parentRow != null)
             parentRow.eliminate(num);
@@ -104,8 +92,32 @@ public class SuCell
     public void reset()
     {
         confirmed = false;
-        number = -1;
+        number = 0;
         Arrays.fill(potentials, true);
+        listPotentials = new ArrayList<>();
+        for(int i = 1; i<10; i++)
+            listPotentials.add(i);
+        
+    }
+    
+    /**
+     * Zeroes out the potentials.
+     */
+    public void zeroPotentials()
+    {
+        Arrays.fill(potentials, false);
+        listPotentials.clear();
+    }
+    
+    /**
+     * Adds a potential 
+     * @param pot The potential to add
+     */
+    public void addPotential(int pot)
+    {
+        if(!potentials[pot-1])
+            listPotentials.add(pot);
+        potentials[pot-1] = true;
     }
     
     
@@ -113,16 +125,9 @@ public class SuCell
      * Potentials to int list
      * @return An arraylist of the potentials.
      */
-    public ArrayList<Integer> listPotentials()
+    public ArrayList<Integer> getListPotentials()
     {
-        ArrayList<Integer> ret = new ArrayList<>();
-        
-        for(int i = 0; i<9; i++)
-        {
-            if(potentials[i])
-                ret.add(i+1);
-        }
-        return ret;
+        return listPotentials;
     }
     
     public void printCell()
@@ -133,9 +138,8 @@ public class SuCell
             System.out.println(number);
         else
         {
-            for(int i = 0; i<9; i++)
-                if(potentials[i])
-                    System.out.print(i+1);
+            for(int i = 0; i<listPotentials.size(); i++)
+                System.out.print(listPotentials.get(i));
             System.out.println();
         }
     }

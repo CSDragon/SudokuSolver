@@ -90,6 +90,23 @@ public class SuGrid
                     System.out.println(" ");
             
         }
+        
+        System.out.println("Left: "+countEmpty());
+    }
+    
+    /**
+     * Counts the number of empty spots in the grid.
+     * @return The number of empty spots in the grid.
+     */
+    public int countEmpty()
+    {
+        int counter = 0;
+        for(int i =0; i<9; i++)
+            for(int j =0; j<9; j++)
+                if(cells[i][j].getNumber() < 1)
+                    counter++;
+        
+        return counter;
     }
     
     public void initialize()

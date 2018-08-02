@@ -20,7 +20,7 @@ public class SudokuReader
     {
         try
         {
-        BufferedReader in = new BufferedReader(new FileReader("SudokuSolver/assets/sampleEasy.txt"));
+        BufferedReader in = new BufferedReader(new FileReader("assets/sampleEasy.txt"));
         return makeNumGrid(in);
         }
         catch(Exception E)

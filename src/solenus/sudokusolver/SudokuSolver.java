@@ -5,6 +5,8 @@
  */
 package solenus.sudokusolver;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author chrsc
@@ -56,6 +58,9 @@ public class SudokuSolver
         grid.initialize();
         levelTwoLogic();
         
+        //l3CheckOnlyHavePair(grid.getCell(1, 6), grid.getCell(1, 7), grid.getSquare(6));
+        SudokuSolver.l3purePair(grid.getCell(0, 6), grid.getCell(2, 6), grid.getSquare(6));
+        
         grid.printGrid();
         System.out.println("");
 
@@ -77,7 +82,7 @@ public class SudokuSolver
         
         for(int i = 0; i<9; i++)
             for(int j = 0; j<9; j++)
-                grid.getCell(i, j).printCell();
+                grid.getCell(j, i).printCell();
         
     }
     
@@ -95,9 +100,9 @@ public class SudokuSolver
                 for(int j = 0; j < 9; j++)
                 {
                     SuCell temp = grid.getCell(i,j);
-                    if(!temp.getConfirmed() && temp.listPotentials().size() == 1)
+                    if(!temp.getConfirmed() && temp.getListPotentials().size() == 1)
                     {
-                        temp.set(temp.listPotentials().get(0));
+                        temp.set(temp.getListPotentials().get(0));
                         notDone = true;
                         levelTwoNotDone = true;
                     }
@@ -129,6 +134,11 @@ public class SudokuSolver
         }
     }
     
+    /**
+     * Checks if any groups have only one place where a number could be.
+     * @param sg The group to check.
+     * @return 
+     */
     public static boolean l2CheckGroup(SuGroup sg)
     {
         boolean notDone = false;
@@ -160,5 +170,73 @@ public class SudokuSolver
         return notDone;
     }
     
+    
+    /**
+     * Checks if a pair are a "Only Have" pair, where they are the only two cells in a group that can be two numbers, removing other potentials.
+     * @param c1 The first cell
+     * @param c2 The second cell
+     * @param sg The group they're in
+     * @return If any changes were made.
+     */
+    public static boolean l3CheckOnlyHavePair(SuCell c1, SuCell c2, SuGroup sg)
+    {
+        boolean changeMade = false;
+        
+        //Find the ones c1 and c2 have in common.
+        ArrayList<Integer> intersection = DataUtils.intersection(c1.getListPotentials(), c2.getListPotentials());
+        //Find the ones the others have total.
+        ArrayList<ArrayList<Integer>> lists = new ArrayList<>();
+        for(int i = 0; i<9; i++)
+            if(sg.getCell(i) != c1 && sg.getCell(i) != c2)
+                lists.add(sg.getCell(i).getListPotentials());
+        ArrayList<Integer> union = DataUtils.multiUnion(lists);
+        
+        //Find the ones that c1 and c2 have that the others do not.
+        ArrayList<Integer> exclusion = DataUtils.exclusion(intersection, union);
+        
+        //If there's only two numbers, we have a pair.
+        if(exclusion.size() == 2)
+        {
+            if(!DataUtils.isTwoArrayListsWithSameValues(c1.getListPotentials(), exclusion) || !DataUtils.isTwoArrayListsWithSameValues(c2.getListPotentials(), exclusion))
+            {
+                changeMade = true;
+
+                //change them so they only have the two potentials.
+                c1.zeroPotentials();
+                c1.addPotential(exclusion.get(0));
+                c1.addPotential(exclusion.get(1));
+
+                c2.zeroPotentials();
+                c2.addPotential(exclusion.get(0));
+                c2.addPotential(exclusion.get(1));
+            }
+        }
+        
+        return changeMade;
+    }
+    
+    public static boolean l3purePair(SuCell c1, SuCell c2, SuGroup sg)
+    {
+        boolean changeMade = false;
+        //they both need to be 2 long, and their intersection two long. That means they're the same.
+        ArrayList<Integer> intersection = DataUtils.intersection(c1.getListPotentials(), c2.getListPotentials());
+        if(c1.getListPotentials().size() == 2 && c2.getListPotentials().size() == 2 && intersection.size() == 2)
+        {
+            //for each cell in sg that isnt' c1 or c2
+            for(int i = 0; i<9; i++)
+                if(sg.getCell(i) != c1 && sg.getCell(i) != c2)
+                {
+                    //eliminate the pair
+                    
+                    //make sure we don't create infinite logic by only calling this a change if anything was actually eliminated.
+                    if(sg.getCell(i).eliminate(intersection.get(0)))
+                        changeMade = true;
+
+                    if(sg.getCell(i).eliminate(intersection.get(1)))
+                        changeMade = true;
+                }
+        }
+        return changeMade;
+    }
     
 }

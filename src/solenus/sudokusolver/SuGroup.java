@@ -76,7 +76,7 @@ public class SuGroup
             if(!cells[i].getConfirmed())
                 for(int j = 0; j<9; j++)
                     if(confirmed[j])
-                        cells[i].getPotentials()[j] = false;
+                        cells[i].eliminate(j+1);
     }
     
     
