@@ -26,16 +26,6 @@ public class SudokuSolver
         for(int k = 0; k< 81; k++)
             nums[k%9][k/9] = (int)(Math.random()*10);
         
-        //sample medium
-        nums = new int[][] {{0,0,3,5,0,2,9,0,0},
-                            {0,0,0,0,4,0,0,0,0},
-                            {1,0,6,0,0,0,3,0,5},
-                            {9,0,0,2,5,1,0,0,8},
-                            {0,7,0,4,0,8,0,3,0},
-                            {8,0,0,7,6,3,0,0,1},
-                            {3,0,8,0,0,0,1,0,4},
-                            {0,0,0,0,2,0,0,0,0},
-                            {0,0,5,1,0,4,8,0,0}};
         
         nums = SudokuReader.test();
            
@@ -43,10 +33,13 @@ public class SudokuSolver
         grid.setGrid(nums);
         
         grid.initialize();
+        
+        System.out.println("Before");
+        grid.printGrid();
+        
         levelThreeLogic();
         
-        
-        
+        System.out.println("After");
         grid.printGrid();
         System.out.println("");
 
@@ -223,6 +216,57 @@ public class SudokuSolver
         }
         return changeMade;
     }
+
+    /**
+     * Checks if a Set in a group is a Pure Set.
+     * A Pure Set is any number of cells that have the exact same potentials with exactly N potentials, where N is the Set size.
+     * IE: Two cells with the potential "14" is a Pure Set. Three cells with the potential "258" is a pure set. Two cells with the potential "456" is NOT.
+     * When a Pure Set is found, that means no other cells in that Group can have those potentials.
+     * Those potentials are removed from all other cells in the Group.
+     * @param cells The list of cells to check the purity of.
+     * @param sg The group which the cells are in.
+     * @return If any changes were made.
+     */    
+    public static boolean pureSet(ArrayList<SuCell> cells, SuGroup sg)
+    {
+        //Initlaize Or checks with false.
+        boolean changeMade = false;
+        
+        //First, let's make sure all cells in the Set have the right Pottentials.
+        //Initialise And checks with true.
+        boolean lengthCheck = true;
+
+        //Make sure each cell's potentials have the right length. If any of them don't, we don't have a set.
+        for(SuCell cell : cells)
+            lengthCheck &= cell.getListPotentials().size() == cells.size();
+        
+        
+        //next we need an arraylist of all the Set's potentials for the multi-intersection function.
+        ArrayList<boolean[]> potentialsList = new ArrayList<>();
+        for (SuCell cell : cells) 
+            potentialsList.add(cell.getPotentials());
+        
+
+        //Intersect the Set's pottentials.
+        ArrayList<Integer> intersection = DataUtils.boolArrayToIntList(DataUtils.boolArrayAnd(potentialsList));
+        
+        //If the intersection is also the right length, then we've proven all cells in the set have the same N potentials.
+        lengthCheck &= intersection.size() == cells.size();
+        
+        
+        //At this point, lengthCheck will be true only if we have a Pure Set
+        if(lengthCheck)
+        {
+            for(int i = 0; i<9; i++)
+                if(!cells.contains(sg.getCell(i)))
+                    for (Integer elim : intersection) 
+                        changeMade |= sg.getCell(i).eliminate(elim);
+        }
+        
+
+        return changeMade;
+
+    }
     
     public static boolean l3PairLogic(SuGroup sg)
     {
@@ -231,19 +275,17 @@ public class SudokuSolver
         for(int i = 0; i<9; i++)
             for(int j = i+1; j<9; j++)
             {
-                gridChanged |= l3CheckOnlyHavePair(sg.getCell(i), sg.getCell(j), sg);
-                gridChanged |= l3PurePair(sg.getCell(i), sg.getCell(j), sg);
+                //gridChanged |= l3CheckOnlyHavePair(sg.getCell(i), sg.getCell(j), sg);
+                
+                ArrayList<SuCell> cells = new ArrayList<>();
+                cells.add(sg.getCell(i));
+                cells.add(sg.getCell(j));
+                gridChanged |= pureSet(cells, sg);
             }
         
         return gridChanged;
     }
     
-    public static boolean l3Itter()
-    {
-        boolean notDone = false;
-        
-        return notDone;
-    }
     
     public static boolean levelThreeLogic()
     {

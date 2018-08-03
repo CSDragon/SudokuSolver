@@ -6,6 +6,8 @@
 package solenus.sudokusolver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -86,5 +88,83 @@ public class DataUtils
         }
 
         return true;
+    }
+    
+    
+    /**
+     * Given a list of boolean arrays, ORs them (Union).
+     * Assumes length 9 boolean array for Sudoku. Not generic.
+     * @param bools List of boolean arrays
+     * @return The resultant Or'd (Union) array.
+     */
+    public static boolean[] boolArrayOr(ArrayList<boolean[]> bools)
+    {
+        boolean[] ret = new boolean[9];
+        Arrays.fill(ret, false);
+        //for each, OR each element in the array.
+        for(int i = 0; i<bools.size(); i++)
+            for(int j = 0; j<9; j++)
+                ret[j] |= bools.get(i)[j];
+        
+        return ret;
+    }
+    
+    /**
+     * Given a list of boolean arrays, ORs them (Intersection).
+     * Assumes length 9 boolean array for Sudoku. Not Generic
+     * @param bools List of boolean arrays.
+     * @return The resultant And'd (Intersection) array.
+     */
+    public static boolean[] boolArrayAnd(ArrayList<boolean[]> bools)
+    {
+        boolean[] ret = new boolean[9];
+        
+        //We have to fill ret with True for Anding, but if bools is empty it should return all False
+        if(bools.isEmpty())
+            return ret;
+        Arrays.fill(ret, true);
+        //for each, AND each element in the array.
+        for(int i = 0; i<bools.size(); i++)
+            for(int j = 0; j<9; j++)
+                ret[j] &= bools.get(i)[j];
+        
+        return ret;
+    }
+    
+    /**
+     * Takes a boolean array and excludes all objects in a list of other boolean arrays.
+     * Assumes length 9 boolean array for Sudoku. Not Generic
+     * @param b1 The boolean array to compare 
+     * @param bools The arrays to compare against.
+     * @return The Excluded boolean array
+     */
+    public static boolean[] boolArrayExclude(boolean[] b1, ArrayList<boolean[]> bools)
+    {
+        boolean[] ret = new boolean[9];
+        
+        //For Ret to have an object, it must both be in b1 and not in bools.
+        for(int i = 0; i<bools.size(); i++)
+            for(int j = 0; j<9; j++)
+                ret[j] = b1[j] & !bools.get(i)[j];
+        
+        
+        return ret;
+    }
+    
+    /**
+     * Turns a boolean array into an integer arraylist of contained values.
+     * Assumes length 9 boolean array for Sudoku. Not Generic
+     * @param b1 The boolean array
+     * @return The Integer list.
+     */
+    public static ArrayList<Integer> boolArrayToIntList(boolean[] b1)
+    {
+        ArrayList<Integer> ret = new ArrayList<>();
+
+        for(int i = 0; i<9; i++)
+            if(b1[i])
+                ret.add(i+1);
+        
+        return ret;
     }
 }
