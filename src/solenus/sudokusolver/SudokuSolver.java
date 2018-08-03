@@ -38,28 +38,14 @@ public class SudokuSolver
                             {0,0,5,1,0,4,8,0,0}};
         
         nums = SudokuReader.test();
-        
-        //sample hard
-        /*
-        nums = new int[][]{{0,0,1,0,0,7,0,9,0},
-                           {5,9,0,0,8,0,0,0,1},
-                           {0,3,0,0,0,0,0,8,0},
-                           {0,0,0,0,0,5,8,0,0},
-                           {0,5,0,0,6,0,0,2,0},
-                           {0,0,4,1,0,0,0,0,0},
-                           {0,8,0,0,0,0,0,3,0},
-                           {1,0,0,0,2,0,0,7,9},
-                           {0,2,0,7,0,0,4,0,0}};
-        */
-        
+           
 
         grid.setGrid(nums);
         
         grid.initialize();
-        levelTwoLogic();
+        levelThreeLogic();
         
-        //l3CheckOnlyHavePair(grid.getCell(1, 6), grid.getCell(1, 7), grid.getSquare(6));
-        SudokuSolver.l3purePair(grid.getCell(0, 6), grid.getCell(2, 6), grid.getSquare(6));
+        
         
         grid.printGrid();
         System.out.println("");
@@ -90,7 +76,7 @@ public class SudokuSolver
     
     public static boolean levelOneLogic()
     {
-        boolean levelTwoNotDone = false;
+        boolean gridChanged = false;
         boolean notDone = true;
         while(notDone)
         {
@@ -104,34 +90,36 @@ public class SudokuSolver
                     {
                         temp.set(temp.getListPotentials().get(0));
                         notDone = true;
-                        levelTwoNotDone = true;
                     }
                 }
+            
+            gridChanged |= notDone;
         }
-        return levelTwoNotDone;
+        return gridChanged;
     }
     
-    public static void levelTwoLogic()
+    public static boolean levelTwoLogic()
     {
+        boolean gridChanged = false;
         boolean notDone = true;
         grid.printGrid();
         while(notDone)
         {
             notDone = false;
             
+            notDone |= levelOneLogic();
+            
             for(int i = 0; i<9; i++)
             {
-                if(l2CheckGroup(grid.getRow(i)))
-                    notDone = true;
-                if(l2CheckGroup(grid.getCol(i)))
-                    notDone = true;
-                if(l2CheckGroup(grid.getSquare(i)))
-                    notDone = true;
+                notDone |= l2CheckGroup(grid.getRow(i));
+                notDone |= l2CheckGroup(grid.getCol(i));
+                notDone |= l2CheckGroup(grid.getSquare(i));
             }
             
-            if(levelOneLogic())
-                notDone = true;
+            gridChanged |= notDone;
         }
+        
+        return gridChanged;
     }
     
     /**
@@ -215,7 +203,7 @@ public class SudokuSolver
         return changeMade;
     }
     
-    public static boolean l3purePair(SuCell c1, SuCell c2, SuGroup sg)
+    public static boolean l3PurePair(SuCell c1, SuCell c2, SuGroup sg)
     {
         boolean changeMade = false;
         //they both need to be 2 long, and their intersection two long. That means they're the same.
@@ -229,14 +217,56 @@ public class SudokuSolver
                     //eliminate the pair
                     
                     //make sure we don't create infinite logic by only calling this a change if anything was actually eliminated.
-                    if(sg.getCell(i).eliminate(intersection.get(0)))
-                        changeMade = true;
-
-                    if(sg.getCell(i).eliminate(intersection.get(1)))
-                        changeMade = true;
+                    changeMade |= sg.getCell(i).eliminate(intersection.get(0));
+                    changeMade |= sg.getCell(i).eliminate(intersection.get(1));
                 }
         }
         return changeMade;
+    }
+    
+    public static boolean l3PairLogic(SuGroup sg)
+    {
+        boolean gridChanged = false;
+        
+        for(int i = 0; i<9; i++)
+            for(int j = i+1; j<9; j++)
+            {
+                gridChanged |= l3CheckOnlyHavePair(sg.getCell(i), sg.getCell(j), sg);
+                gridChanged |= l3PurePair(sg.getCell(i), sg.getCell(j), sg);
+            }
+        
+        return gridChanged;
+    }
+    
+    public static boolean l3Itter()
+    {
+        boolean notDone = false;
+        
+        return notDone;
+    }
+    
+    public static boolean levelThreeLogic()
+    {
+        boolean gridChanged = false;
+        
+        boolean notDone = true;
+        while(notDone)
+        {
+            notDone = false;
+            
+            notDone |= levelTwoLogic();
+            
+            for(int i = 0; i<9; i++)
+            {
+                notDone |= l3PairLogic(grid.getRow(i));
+                notDone |= l3PairLogic(grid.getCol(i));
+                notDone |= l3PairLogic(grid.getSquare(i));
+            }
+            
+            gridChanged |= notDone;
+        }
+        
+        return gridChanged;
     }
     
 }
