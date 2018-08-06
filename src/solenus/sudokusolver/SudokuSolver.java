@@ -63,6 +63,8 @@ public class SudokuSolver
             for(int j = 0; j<9; j++)
                 grid.getCell(j, i).printCell();
         
+        
+        grid.printPotentials();
     }
     
     
@@ -275,7 +277,7 @@ public class SudokuSolver
         for(int i = 0; i<9; i++)
             for(int j = i+1; j<9; j++)
             {
-                //gridChanged |= l3CheckOnlyHavePair(sg.getCell(i), sg.getCell(j), sg);
+                gridChanged |= l3CheckOnlyHavePair(sg.getCell(i), sg.getCell(j), sg);
                 
                 ArrayList<SuCell> cells = new ArrayList<>();
                 cells.add(sg.getCell(i));

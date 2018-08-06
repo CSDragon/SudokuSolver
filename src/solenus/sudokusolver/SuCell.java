@@ -144,6 +144,27 @@ public class SuCell
         }
     }
     
+    /**
+     * Prints the potentials with whitespaces to make an even coating.
+     * @param maxPotentials the max number of potentials any cell has in the grid.
+     */
+    public void printPotentials(int maxPotentials)
+    {
+        if(confirmed)
+        {
+            for(int i = 0; i<maxPotentials-listPotentials.size()-1; i++)
+                System.out.print("-");
+            
+            System.out.print(number);
+        }
+        else
+        {
+            for(int i = 0; i<maxPotentials-listPotentials.size(); i++)
+                System.out.print("-");
+            for(int i = 0; i<listPotentials.size(); i++)
+                System.out.print(listPotentials.get(i));
+        }
+    }
     
     
     /**

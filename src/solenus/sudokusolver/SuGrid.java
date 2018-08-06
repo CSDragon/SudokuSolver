@@ -94,6 +94,28 @@ public class SuGrid
         System.out.println("Left: "+countEmpty());
     }
     
+    public void printPotentials()
+    {
+        int maxPotential = -1;
+        for(int j = 0; j< 9; j++)
+            for(int i = 0; i < 9; i++)
+                if(cells[i][j].getListPotentials().size() > maxPotential)
+                    maxPotential = cells[i][j].getListPotentials().size();
+        
+        for(int j = 0; j<9; j++)
+        {
+            for(int i = 0; i<8; i++)
+            {
+                cells[i][j].printPotentials(maxPotential);
+                System.out.print(" ");
+            }
+            
+                cells[8][j].printPotentials(maxPotential);
+                System.out.println("");
+            
+        }
+    }
+    
     /**
      * Counts the number of empty spots in the grid.
      * @return The number of empty spots in the grid.
