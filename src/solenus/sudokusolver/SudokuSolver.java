@@ -6,6 +6,7 @@
 package solenus.sudokusolver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  *
@@ -270,7 +271,7 @@ public class SudokuSolver
 
     }
     
-    public static boolean l3PairLogic(SuGroup sg)
+    public static boolean purePair(SuGroup sg)
     {
         boolean gridChanged = false;
         
@@ -302,12 +303,79 @@ public class SudokuSolver
             
             for(int i = 0; i<9; i++)
             {
-                notDone |= l3PairLogic(grid.getRow(i));
-                notDone |= l3PairLogic(grid.getCol(i));
-                notDone |= l3PairLogic(grid.getSquare(i));
+                notDone |= purePair(grid.getRow(i));
+                notDone |= purePair(grid.getCol(i));
+                notDone |= purePair(grid.getSquare(i));
             }
             
+            for(int i = 0; i<9; i++)
+                for(int j = 0; j<9; j++)
+                {
+                    notDone |= pointingSet(grid.getSquare(i), grid.getRow(j));
+                    notDone |= pointingSet(grid.getSquare(i), grid.getCol(j));
+                }
+            
             gridChanged |= notDone;
+        }
+        
+        return gridChanged;
+    }
+    
+    
+    /**
+     * Identifies the common cells between two groups and sees if they contain the only instances of a potential in one of the groups.
+     * @param g1 The first set to check.
+     * @param g2 The second set to check.
+     * @return If the grid changed as a result of this action.
+     */
+    public static boolean pointingSet(SuGroup g1, SuGroup g2)
+    {
+        boolean gridChanged = false;
+        
+        ArrayList<SuCell> intersection = DataUtils.intersection(new ArrayList<>(Arrays.asList(g1.getCells())), new ArrayList<> (Arrays.asList(g2.getCells())));
+        
+        //we aren't interested in groups with no intersection (size == 0) or interesctions of rows and colums. Those were handled already. Only Squares with a row or col that actually intersect. 
+        if(intersection.size() == 3)
+        {
+            
+            //Get the list of potentials in the intersection
+            ArrayList<ArrayList<Integer>> intersectionList = new ArrayList<>();
+            for(SuCell cell : intersection)
+                intersectionList.add(cell.getListPotentials());
+            ArrayList<Integer> intersectionPotentials = DataUtils.multiUnion(intersectionList);
+            
+            //Get the list of cells in g1 not in the intersection, as well as the list of potentials unique to cells in the intersection. 
+            ArrayList<SuCell> g1Ex = DataUtils.exclusion(new ArrayList<>(Arrays.asList(g1.getCells())), intersection);
+            ArrayList<ArrayList<Integer>> g1ExList = new ArrayList<>();
+            for(SuCell cell : g1Ex)
+                g1ExList.add(cell.getListPotentials());
+            ArrayList<Integer> g1ExPotentials = DataUtils.multiUnion(g1ExList);
+            ArrayList<Integer> g1PotentialIntersection = DataUtils.exclusion(intersectionPotentials, g1ExPotentials);
+            
+            //Get the list of cells in g2 not in the intersection, as well as the list of potentials unique to cells in the intersection.
+            ArrayList<SuCell> g2Ex = DataUtils.exclusion(new ArrayList<>(Arrays.asList(g2.getCells())), intersection);
+            ArrayList<ArrayList<Integer>> g2ExList = new ArrayList<>();
+            for(SuCell cell : g2Ex)
+                g2ExList.add(cell.getListPotentials());
+            ArrayList<Integer> g2ExPotentials = DataUtils.multiUnion(g2ExList);
+            ArrayList<Integer> g2PotentialIntersection = DataUtils.exclusion(intersectionPotentials, g2ExPotentials);
+            
+            //A "pointing set" occurs when all the points with a certain pottential in one group occur within the intersection space.
+            //This means that for the other group, that group's instance of that number must be in the intersection as well, and others can be eliminated.
+            //IE: All the 2's in a square are lined up in a row. That means the 2 for that row can't be outside that square, or it would invalidate that square. So none of those cells can have 2.
+            
+            //So g2Ex excludes the poentals unique to g1's potential intersection
+            for (Integer potential : g1PotentialIntersection) 
+                for (SuCell cell : g2Ex) 
+                    gridChanged |= cell.eliminate(potential);
+            
+            //And g1Ex excludes the poentals unique to g1's potential intersection
+            for (Integer potential : g2PotentialIntersection) 
+                for (SuCell cell : g1Ex) 
+                    gridChanged |= cell.eliminate(potential);
+            
+            //If there were no potentials unique to the intersection, the for loop will never incrament, and nothing will change, which is what we want.
+            
         }
         
         return gridChanged;
