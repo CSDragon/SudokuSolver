@@ -271,19 +271,28 @@ public class SudokuSolver
 
     }
     
-    public static boolean purePair(SuGroup sg)
+    /**
+     * 
+     * @param sg
+     * @return 
+     */
+    public static boolean l3PairLogic(SuGroup sg)
     {
         boolean gridChanged = false;
         
         for(int i = 0; i<9; i++)
             for(int j = i+1; j<9; j++)
             {
-                gridChanged |= l3CheckOnlyHavePair(sg.getCell(i), sg.getCell(j), sg);
+                //the CheckOnlyHavePair function is really just a watered down version of the pointing set. 
+                //gridChanged |= l3CheckOnlyHavePair(sg.getCell(i), sg.getCell(j), sg);
                 
+                gridChanged |= SudokuSolver.l3PurePair(sg.getCell(i), sg.getCell(j), sg);
+                /* In theory we should do Pure Pair with with 2, 3 and 4, but it's not nessisary.
                 ArrayList<SuCell> cells = new ArrayList<>();
                 cells.add(sg.getCell(i));
                 cells.add(sg.getCell(j));
                 gridChanged |= pureSet(cells, sg);
+                */
             }
         
         return gridChanged;
@@ -303,9 +312,9 @@ public class SudokuSolver
             
             for(int i = 0; i<9; i++)
             {
-                notDone |= purePair(grid.getRow(i));
-                notDone |= purePair(grid.getCol(i));
-                notDone |= purePair(grid.getSquare(i));
+                notDone |= l3PairLogic(grid.getRow(i));
+                notDone |= l3PairLogic(grid.getCol(i));
+                notDone |= l3PairLogic(grid.getSquare(i));
             }
             
             for(int i = 0; i<9; i++)
