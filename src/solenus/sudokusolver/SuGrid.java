@@ -57,17 +57,13 @@ public class SuGrid
     
     public void setGrid(int[][] nums)
     {
-        
-        //Invert the input because I"M AN IDIOT
-        //nums is in [row][col] format where we want [col][row]
-        
         for(int i = 0; i<9; i++)
             for(int j=0; j<9; j++)
             {
                 if(nums[i][j] > 0 && nums[i][j] < 10)
-                    cells[j][i].set(nums[i][j]);
+                    cells[i][j].set(nums[i][j]);
                 else
-                    cells[j][i].reset();
+                    cells[i][j].reset();
             }
     }
     

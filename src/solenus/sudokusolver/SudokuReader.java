@@ -10,17 +10,21 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /**
- *
+ * Utility class for reading in Sudokus
  * @author Chris
  */
 public class SudokuReader 
 {
-    
+ 
+    /**
+     * Used for reading in the test Sudoku
+     * @return The test sudoku in int[][] form.
+     */
     public static int[][] test()
     {
         try
         {
-            BufferedReader in = new BufferedReader(new FileReader("SudokuSolver/assets/sampleEasy.txt"));
+            BufferedReader in = new BufferedReader(new FileReader("assets/sampleEasy.txt"));
             return makeNumGrid(in);
         }
         catch(Exception E)
@@ -31,17 +35,26 @@ public class SudokuReader
         return null;
     }
     
-    
+    /**
+     * Given a textstream, creates a Sudoku for 
+     * @param in A textstream with the Sudoku in it.
+     * @return A 9x9 integer array to make the Sudoku's grid.
+     * @throws IOException 
+     */
     public static int[][] makeNumGrid(BufferedReader in) throws IOException
     {
         int[][] ret = new int[9][9];
-        
+     
+        //for 9 lines
         for(int i = 0; i<9; i++)
         {
-            char[] line = new char[9];
-            line = in.readLine().toCharArray();
+            char[] line = in.readLine().toCharArray();
+            //for 9 columns
             for(int j = 0; j<9; j++)
-                ret[i][j] =  line[j]-48; 
+            {
+                //Add the number to the int array at [row][col]
+                ret[j][i] =  line[j]-48; 
+            }
         }
         
         return ret;

@@ -16,12 +16,6 @@ import java.util.List;
 public class SuCell 
 {
 
-    /**
-     * @param parentSquare the parentSquare to set
-     */
-    public void setParentSquare(SuGroup parentSquare) {
-        this.parentSquare = parentSquare;
-    }
     private boolean confirmed;
     private int number;
     private boolean[] potentials;
@@ -245,5 +239,13 @@ public class SuCell
     public SuGroup getParentSquare() 
     {
         return parentSquare;
+    }
+    
+    /**
+     * @param parentSquare the parentSquare to set
+     */
+    public void setParentSquare(SuGroup parentSquare) 
+    {
+        this.parentSquare = parentSquare;
     }
 }

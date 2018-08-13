@@ -107,9 +107,9 @@ public class SudokuSolver
             
             for(int i = 0; i<9; i++)
             {
-                notDone |= l2CheckGroup(grid.getRow(i));
-                notDone |= l2CheckGroup(grid.getCol(i));
-                notDone |= l2CheckGroup(grid.getSquare(i));
+                notDone |= hiddenCellCheck(grid.getRow(i));
+                notDone |= hiddenCellCheck(grid.getCol(i));
+                notDone |= hiddenCellCheck(grid.getSquare(i));
             }
             
             gridChanged |= notDone;
@@ -123,7 +123,7 @@ public class SudokuSolver
      * @param sg The group to check.
      * @return 
      */
-    public static boolean l2CheckGroup(SuGroup sg)
+    public static boolean hiddenCellCheck(SuGroup sg)
     {
         boolean notDone = false;
         
@@ -156,13 +156,14 @@ public class SudokuSolver
     
     
     /**
-     * Checks if a pair are a "Only Have" pair, where they are the only two cells in a group that can be two numbers, removing other potentials.
+     * Checks if a pair are hidden, meaning they're the only two cells in a group with a pair of potentials.
+     * Thus, all potentials but that pair can be removed. This is useful for identifying pointing sets.
      * @param c1 The first cell
      * @param c2 The second cell
      * @param sg The group they're in
      * @return If any changes were made.
      */
-    public static boolean l3CheckOnlyHavePair(SuCell c1, SuCell c2, SuGroup sg)
+    public static boolean hiddenPairCheck(SuCell c1, SuCell c2, SuGroup sg)
     {
         boolean changeMade = false;
         
@@ -181,7 +182,7 @@ public class SudokuSolver
         //If there's only two numbers, we have a pair.
         if(exclusion.size() == 2)
         {
-            if(!DataUtils.isTwoArrayListsWithSameValues(c1.getListPotentials(), exclusion) || !DataUtils.isTwoArrayListsWithSameValues(c2.getListPotentials(), exclusion))
+            if(!DataUtils.arrayListEquivalenceOrderIndependent(c1.getListPotentials(), exclusion) || !DataUtils.arrayListEquivalenceOrderIndependent(c2.getListPotentials(), exclusion))
             {
                 changeMade = true;
 
@@ -199,7 +200,7 @@ public class SudokuSolver
         return changeMade;
     }
     
-    public static boolean l3PurePair(SuCell c1, SuCell c2, SuGroup sg)
+    public static boolean purePairCheck(SuCell c1, SuCell c2, SuGroup sg)
     {
         boolean changeMade = false;
         //they both need to be 2 long, and their intersection two long. That means they're the same.
@@ -272,21 +273,22 @@ public class SudokuSolver
     }
     
     /**
-     * 
-     * @param sg
-     * @return 
+     * Checks a group for hidden and pure pairs.
+     * @param sg The group to check.
+     * @return If the grid has changed as a result of this action.
      */
-    public static boolean l3PairLogic(SuGroup sg)
+    public static boolean groupPairCheck(SuGroup sg)
     {
         boolean gridChanged = false;
         
         for(int i = 0; i<9; i++)
             for(int j = i+1; j<9; j++)
             {
-                //the CheckOnlyHavePair function is really just a watered down version of the pointing set. 
-                //gridChanged |= l3CheckOnlyHavePair(sg.getCell(i), sg.getCell(j), sg);
+                gridChanged |= hiddenPairCheck(sg.getCell(i), sg.getCell(j), sg);
+                gridChanged |= purePairCheck(sg.getCell(i), sg.getCell(j), sg);
                 
-                gridChanged |= SudokuSolver.l3PurePair(sg.getCell(i), sg.getCell(j), sg);
+                
+                
                 /* In theory we should do Pure Pair with with 2, 3 and 4, but it's not nessisary.
                 ArrayList<SuCell> cells = new ArrayList<>();
                 cells.add(sg.getCell(i));
@@ -299,6 +301,10 @@ public class SudokuSolver
     }
     
     
+    /**
+     * 
+     * @return 
+     */
     public static boolean levelThreeLogic()
     {
         boolean gridChanged = false;
@@ -312,9 +318,9 @@ public class SudokuSolver
             
             for(int i = 0; i<9; i++)
             {
-                notDone |= l3PairLogic(grid.getRow(i));
-                notDone |= l3PairLogic(grid.getCol(i));
-                notDone |= l3PairLogic(grid.getSquare(i));
+                notDone |= groupPairCheck(grid.getRow(i));
+                notDone |= groupPairCheck(grid.getCol(i));
+                notDone |= groupPairCheck(grid.getSquare(i));
             }
             
             for(int i = 0; i<9; i++)
